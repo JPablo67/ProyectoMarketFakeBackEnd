@@ -1,7 +1,9 @@
 package com.Alejandro.Service;
 
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,30 +36,22 @@ public class UserService {
 	 public User findByIdUSer(Long idUser) {
 	        return userRepository.findById(idUser).orElse(null);
 	    }
-	 
 	 public int findLogin(String email, String password) {
-		   
-		    List<User> users = userRepository.findAll();
+		    List<User> users = Optional.ofNullable(userRepository.findAll()).orElse(Collections.emptyList());
 
-		    for (User user : users) {
-		        if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
-		            String userType = user.getUserType();
-
-		            // Verifica el tipo de usuario y devuelve el resultado.
-		            if ("Cliente".equals(userType)) {
-		                return 1;
-		            } else if ("Empleado".equals(userType)) {
-		                return 2;
-		            } else if ("Admin".equals(userType)) {
-		                return 3;
-		            }
-		        }
-		    }
-
-		  
-		    return 0;
+		    return users.stream()
+		            .filter(user -> user.getEmail().equals(email) && user.getPassword().equals(password))
+		            .map(User::getUserType)
+		            .map(userType -> {
+		                if ("Cliente".equals(userType)) return 1;
+		                else if ("Empleado".equals(userType)) return 2;
+		                else if ("Admin".equals(userType)) return 3;
+		                else return 0;
+		            })
+		            .findFirst()
+		            .orElse(0);
 		}
-	 
+
 
 	  
 	 
