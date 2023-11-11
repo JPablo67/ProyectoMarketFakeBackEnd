@@ -51,6 +51,10 @@ public class UserService {
 		            .findFirst()
 		            .orElse(0);
 		}
+	 
+	 public User findByEmail (String email) {
+		 return userRepository.findByEmail(email);
+	 }
 
 
 	  

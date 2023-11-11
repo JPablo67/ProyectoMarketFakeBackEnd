@@ -9,8 +9,15 @@ import org.springframework.data.repository.query.Param;
 
 import com.Alejandro.models.Cart;
 import com.Alejandro.models.Product;
+import com.Alejandro.models.User;
 
 
 public interface ICartRepository  extends JpaRepository<Cart, Long>{
 
+	List<Cart> findByUser (User user);
+	
+	
+	Cart findByProduct (Product product);
+	
+	
 }

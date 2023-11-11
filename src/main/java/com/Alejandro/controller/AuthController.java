@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.Alejandro.Service.UserService;
 import com.Alejandro.models.LoginResponse;
+import com.Alejandro.models.Product;
+import com.Alejandro.models.User;
 
 import java.util.Map;
 
@@ -46,6 +48,16 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+    
+    
+    @GetMapping("/searching/{email}")
+    public User findByEmail(@PathVariable String email) {
+    	System.out.println(email);
+    	return userService.findByEmail(email);
+    	
+    }
+		
+    
 
 
 }
