@@ -23,7 +23,7 @@ public class Cart {
 	@JoinColumn(name = "idUser")
 	private User user;
 	
-	@OneToOne // Esta anotación indica una relación ManyToOne
+	@ManyToOne // Esta anotación indica una relación ManyToOne
 	@JoinColumn(name = "idProduct")
 	private Product product;
 
