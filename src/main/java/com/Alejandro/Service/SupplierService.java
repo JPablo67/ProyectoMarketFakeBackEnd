@@ -39,6 +39,11 @@ public class SupplierService {
 	 public Supplier findByIdSupplier(Long idSupplier) {
 	        return supplierRepository.findById(idSupplier).orElse(null);
 	    }
+
+	 public Supplier findSupplierBynameSupplier(String nameSupplier) {
+	        return supplierRepository.findSupplierBynameSupplier(nameSupplier);
+	    }
+
 	 
 	
 	 

@@ -46,6 +46,13 @@ public class CategoryService {
 		 return listaProductosCategoria;
 	    
 	 }
+	 
+	 public Category getProductsByCategoryName(String categoryName){
+		 
+		return categoryRepository.findByCategoryName(categoryName);
+	    
+	 }
+	 
 
 
 	

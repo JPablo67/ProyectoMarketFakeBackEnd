@@ -1,8 +1,6 @@
 package com.Alejandro.models;
 
 
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 @Entity(name ="carts")
@@ -22,12 +19,12 @@ public class Cart {
 	private long idCart;
 
 	
-	@OneToOne // Esta anotación indica una relación ManyToOne
-	@JoinColumn(name = "idUser") // Nombre de la columna que almacena la relación en la tabla de Producto
+	@ManyToOne // Esta anotación indica una relación ManyToOne
+	@JoinColumn(name = "idUser")
 	private User user;
 	
 	@OneToOne // Esta anotación indica una relación ManyToOne
-	@JoinColumn(name = "idProduct") // Nombre de la columna que almacena la relación en la tabla de Producto
+	@JoinColumn(name = "idProduct")
 	private Product product;
 
 

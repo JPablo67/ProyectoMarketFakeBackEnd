@@ -49,6 +49,14 @@ public class DemoControllerCategory {
 	        
 	    }
 	    
+	    @GetMapping("/{categoryName}/categories")
+	    public ResponseEntity<Category>getCategoryByName(@PathVariable String categoryName) {
+	 
+	    	  return ResponseEntity.ok(categoryService.getProductsByCategoryName(categoryName));
+	        
+	        
+	    }
+	    
 	    @PutMapping("/{idCategory}/update")
 	    public ResponseEntity<Category> update(@PathVariable Long idCategory, @RequestBody Category category) {
 	    	Category existingCategory= categoryService.getCategoryById(idCategory);

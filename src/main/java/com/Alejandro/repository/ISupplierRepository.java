@@ -7,4 +7,6 @@ import com.Alejandro.models.Supplier;
 
 public interface ISupplierRepository  extends JpaRepository<Supplier, Long>{
 
+	Supplier findSupplierBynameSupplier (String nameSupplier);
+	
 }

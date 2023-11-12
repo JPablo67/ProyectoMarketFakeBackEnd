@@ -33,6 +33,10 @@ public class DemoControllerSupplier {
 	        return ResponseEntity.ok(supplierService.suppliers());
 	    }
 
+	   @GetMapping("/{nameSupplier}/name")
+	    public ResponseEntity<Supplier> findBySupplierName(@PathVariable String nameSupplier) {
+	        return ResponseEntity.ok(supplierService.findSupplierBynameSupplier(nameSupplier));
+	    }
 	 
 
 	    @PostMapping

@@ -8,4 +8,5 @@ import com.Alejandro.models.Category;
 
 public interface ICategoryRepository  extends JpaRepository<Category, Long>{
 
+	Category findByCategoryName(String categoryName);
 }

@@ -41,6 +41,7 @@ public class DemoControllerCart {
 
     @PostMapping
     public ResponseEntity<Cart> create(@RequestBody Cart cart) {
+    	
         return ResponseEntity.ok(cartService.save(cart));
     }
 
@@ -48,12 +49,12 @@ public class DemoControllerCart {
 
 	    @GetMapping("/{idUser}/carts")
 	    public ResponseEntity<List<Cart>>getUserById(@PathVariable Long idUser) {
+	    	
 			 return ResponseEntity.ok(cartService.findCartByOwner(idUser));
 	    }
 	 
 	 
 	    @GetMapping("/checkProductInCart/{idUser}/{idProduct}")
-	    @ResponseBody
 	    public ResponseEntity<Map<String, Boolean>> checkProductInCart(
 	        @PathVariable("idUser") long idUser,
 	        @PathVariable("idProduct") long idProduct) {
