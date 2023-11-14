@@ -47,10 +47,6 @@ public class Product {
 	private Supplier supplier;
 	
 	@ManyToOne // Esta anotación indica una relación ManyToOne
-	@JoinColumn(name = "idSale") // Nombre de la columna que almacena la relación en la tabla de Producto
-	private Sale sale;
-	
-	@ManyToOne // Esta anotación indica una relación ManyToOne
 	@JoinColumn(name = "idInventory") // Nombre de la columna que almacena la relación en la tabla de Producto
 	private Inventory inventory;
 	
@@ -122,13 +118,6 @@ public class Product {
 		this.cart = cart;
 	}
 
-	public Sale getSale() {
-		return sale;
-	}
-
-	public void setSale(Sale sale) {
-		this.sale = sale;
-	}
 
 	public Inventory getInventory() {
 		return inventory;
@@ -150,7 +139,7 @@ public class Product {
 	public String toString() {
 		return "Product [idProduct=" + idProduct + ", price=" + price + ", url_photo=" + url_photo + ", quantityToSell="
 				+ quantityToSell + ", category=" + category + ", productName=" + productName + ", productDescription="
-				+ productDescription + ", cart=" + cart + ", supplier=" + supplier + ", sale=" + sale + ", inventory="
+				+ productDescription + ", cart=" + cart + ", supplier=" + supplier +  ", inventory="
 				+ inventory + "]";
 	}
 

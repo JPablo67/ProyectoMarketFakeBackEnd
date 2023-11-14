@@ -25,7 +25,7 @@ public class Sale {
 	
 
 	@OneToMany(mappedBy="sale")
-	private List <Product> soldList;
+	private List <Cart> soldList;
 	
 	@Column(name = "address")
 	private String address;
@@ -42,7 +42,7 @@ public class Sale {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Sale(long idSale, int price, List<Product> soldList, String address, String phoneNumber,
+	public Sale(long idSale, int price, List<Cart> soldList, String address, String phoneNumber,
 			User user) {
 		super();
 		this.idSale = idSale;
@@ -69,11 +69,11 @@ public class Sale {
 		this.price = price;
 	}
 
-	public List<Product> getSoldList() {
+	public List<Cart> getSoldList() {
 		return soldList;
 	}
 
-	public void setSoldList(List<Product> soldList) {
+	public void setSoldList(List<Cart> soldList) {
 		this.soldList = soldList;
 	}
 

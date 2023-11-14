@@ -31,7 +31,13 @@ public class CartService {
 	
 	
 	public Cart save(Cart cart) {
+		
+		boolean productInCar = checkProductInCart(cart.getUser().getIdUser(), cart.getProduct().getIdProduct());
+		
+		if(!productInCar==true ) {
 		return cartRepository.save(cart);
+		}
+	return null;
 	}
 	
 	public boolean checkProductInCart (long idUser, long idProduct) {

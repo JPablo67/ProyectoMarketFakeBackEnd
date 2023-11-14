@@ -27,7 +27,11 @@ public class Cart {
 	@JoinColumn(name = "idProduct")
 	private Product product;
 
-
+	
+	@ManyToOne // Esta anotación indica una relación ManyToOne
+	@JoinColumn(name = "idSale") // Nombre de la columna que almacena la relación en la tabla de Producto
+	private Sale sale;
+	
 	public Cart() {
 		super();
 		// TODO Auto-generated constructor stub

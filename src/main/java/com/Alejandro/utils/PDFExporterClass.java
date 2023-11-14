@@ -1,114 +1,74 @@
 package com.Alejandro.utils;
 
-import java. awt.Color; 
-import java. io. IOException; 
-import java.util. List;
-import com. lowagie. text. Document; 
-import com. lowagie.text.DocumentException;
-import com. lowagie. text. Font; 
-import com. lowagie. text. FontFactory; 
-import com. lowagie. text. PageSize; 
-import com. lowagie. text. Paragraph; 
-import com. lowagie. text. Phrase; 
-import com. lowagie.text.pdf.PdfPCell;
-import com. lowagie. text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfTable;
+import com.Alejandro.Service.CartService;
+import com.Alejandro.Service.SaleService;
+import com.Alejandro.models.Cart;
+import com.Alejandro.models.Sale;
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfWriter;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import jakarta.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
+@Service
 public class PDFExporterClass {
+
+	@Autowired
+	CartService cartService;
 	
-	public PDFExporterClass () {
-		super();
-	}
+	@Autowired
+	SaleService saleService;
 	
-	private void writeTableHeader(PdfPTable table) {
-		
-	        PdfPCell cell = new PdfPCell();
-	        cell.setBackgroundColor(Color.BLUE);
-	        cell.setPadding(5);
-	         
-	        Font font = FontFactory.getFont(FontFactory.HELVETICA);
-	        font.setColor(Color.WHITE);
-	        
-	        Font hola = FontFactory.getFont(FontFactory.COURIER_OBLIQUE);
-	        font.setColor(Color.WHITE);
-	         
-	        cell.setPhrase(new Phrase("OPCION 1", font));
-	        table.addCell(cell);
-	         
-	        cell.setPhrase(new Phrase("OPCION 2", hola));
-	        table.addCell(cell);
-	        
-	        cell.setPhrase(new Phrase("OPCION 3", font));
-	        table.addCell(cell);
-	         
-	        cell.setPhrase(new Phrase("OPCION 4", font));
-	        table.addCell(cell);
-	        
-	        cell.setPhrase(new Phrase("OPCION 5", font));
-	        table.addCell(cell);
-	        
-	
-	}
-	
-	private void writeTableData(PdfPTable table) {
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		table.addCell("DATO 1");
-		table.addCell("Total = ");
-		table.addCell("34.000");
-	}
-	
-	public void export(HttpServletResponse response) throws DocumentException, IOException {
-        Document document = new Document(PageSize.A4.rotate());
+    public void export(HttpServletResponse response, Sale sale) throws DocumentException, IOException {
+        Document document = new Document();
         PdfWriter.getInstance(document, response.getOutputStream());
-         
+
         document.open();
-        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
-        font.setSize(15);
-        font.setColor(Color.BLACK);
-         
-        Paragraph p = new Paragraph("Factura Compra ", font);
-        Paragraph p2 = new Paragraph("Id Factura : ", font);
-        Paragraph p3 = new Paragraph("Fecha Compra : " , font);
-        Paragraph p4 = new Paragraph("Nombre Persona : " , font);
-        Paragraph p5 = new Paragraph("Cedula : " , font);
 
-        
-        p.setAlignment(Paragraph.ALIGN_CENTER);
-        p2.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-        p3.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-        p4.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-        p5.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-        
+        // Configurar fuente y colores
+        Font headingFont = new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.EMBEDDED), 18, Font.BOLD, Color.BLUE);
+        Font subHeadingFont = new Font(BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.EMBEDDED), 14, Font.BOLD, Color.DARK_GRAY);
+        Font normalFont = new Font(BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED), 12, Font.NORMAL, Color.BLACK);
 
-         
-        document.add(p);
-        document.add(p4);
-        document.add(p2);
-        document.add(p3);
-        document.add(p5);
+        // Agregar detalles de la venta al PDF
+        addSaleDetails(document, sale, headingFont, subHeadingFont, normalFont);
 
-         
-        PdfPTable table = new PdfPTable(5);
-        table.setWidthPercentage(100f);
-        table.setWidths(new float[] {3.5f, 2.0f,1.5f, 2.0f, 2.0f});
-        table.setSpacingBefore(10);
-         
-        writeTableHeader(table);
-        writeTableData(table);
-         
-        document.add(table);
+        // Agregar detalles de los productos vendidos al PDF
+        addSoldProducts(document, sale.getUser().getIdUser(), subHeadingFont, normalFont);
 
         document.close();
-         
+    }
+
+    private void addSaleDetails(Document document, Sale sale, Font headingFont, Font subHeadingFont, Font normalFont) throws DocumentException {
+    	
+    
+    	
+        document.add(new Paragraph("Detalles de la Venta", headingFont));
+        document.add(new Paragraph("Dirección: " + sale.getAddress(), subHeadingFont));
+        document.add(new Paragraph("Teléfono: " + sale.getPhoneNumber(), subHeadingFont));
+        document.add(new Paragraph("Precio total: $" + sale.getPrice(), subHeadingFont));
+        // Agregar más detalles según sea necesario
+        document.add(Chunk.NEWLINE); // Separador entre secciones
+    }
+
+    private void addSoldProducts(Document document, long idUser, Font subHeadingFont, Font normalFont) throws DocumentException {
+        document.add(new Paragraph("Productos Vendidos", subHeadingFont));
+        
+        List<Cart>carts = cartService.findCartByOwner(idUser);
+             
+
+        for (Cart cart : carts) {
+            document.add(new Paragraph("Nombre: " + cart.getProduct().getProductName(), normalFont));
+            document.add(new Paragraph("Precio: $" + cart.getProduct().getPrice(), normalFont));
+            // Agregar más detalles según sea necesario
+            document.add(Chunk.NEWLINE); // Separador entre productos
+        }
     }
 }

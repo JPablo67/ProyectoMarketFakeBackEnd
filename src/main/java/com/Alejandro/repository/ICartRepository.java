@@ -11,6 +11,8 @@ import com.Alejandro.models.Cart;
 import com.Alejandro.models.Product;
 import com.Alejandro.models.User;
 
+import jakarta.transaction.Transactional;
+
 
 public interface ICartRepository  extends JpaRepository<Cart, Long>{
 
@@ -18,6 +20,9 @@ public interface ICartRepository  extends JpaRepository<Cart, Long>{
 	
 	
 	Cart findByProduct (Product product);
+	
+	 @Transactional
+	    void deleteByUserAndProduct(User user, Product product);
 	
 	
 }
