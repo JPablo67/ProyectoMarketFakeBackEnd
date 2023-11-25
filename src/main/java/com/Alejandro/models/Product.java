@@ -38,9 +38,16 @@ public class Product {
 	@Column(name = "productDescription")
 	private String productDescription;
 	
+	@Column(name = "applyShipping")
+	private boolean applyShipping;
+	
+	@Column(name = "shippingValue")
+	private int shippingValue;
+	
 	@ManyToOne // Esta anotación indica una relación ManyToOne
 	@JoinColumn(name = "idCart") // Nombre de la columna que almacena la relación en la tabla de Producto
 	private Cart cart;
+	
 	
 	@ManyToOne // Esta anotación indica una relación ManyToOne
 	@JoinColumn(name = "idSupplier") // Nombre de la columna que almacena la relación en la tabla de Producto
@@ -134,6 +141,27 @@ public class Product {
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
 	}
+	
+
+	public boolean isApplyShipping() {
+		return applyShipping;
+	}
+
+	public void setApplyShipping(boolean applyShipping) {
+		this.applyShipping = applyShipping;
+	}
+
+	public int getShippingValue() {
+		return shippingValue;
+	}
+
+	public void setShippingValue(int shippingValue) {
+		this.shippingValue = shippingValue;
+	}
+
+	
+	
+	
 
 	@Override
 	public String toString() {

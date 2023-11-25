@@ -16,7 +16,7 @@ import com.Alejandro.models.Product;
 import com.Alejandro.models.Sale;
 import com.Alejandro.models.User;
 
-
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -38,12 +38,11 @@ public class SaleService {
 	    
 	    @Autowired
 	    private CartService cartService;
-
 	    @Transactional
-	    public Sale makePurchase(long idUser, String address, String phoneNumber, Integer totalQuantity) {
+	    public Sale makePurchase(User user) {
 	        try {
 	            // Obtener la lista de carritos del usuario con la cédula proporcionada
-	            List<Cart> cartItems = cartService.findCartByOwner(idUser);
+	            List<Cart> cartItems = cartService.findCartByOwner(user.getIdUser());
 
 	            // Verificar si la lista de carritos no está vacía
 	            if (!cartItems.isEmpty()) {
@@ -52,7 +51,7 @@ public class SaleService {
 	                // Crear una nueva venta
 	                Sale sale = new Sale();
 	                // Obtener el usuario por la cédula
-	                User user = userRepository.findById(idUser).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+	               
 	                sale.setUser(user);
 
 	                // Lista de productos vendidos
@@ -60,24 +59,24 @@ public class SaleService {
 
 	                // Calcular el precio total y actualizar la cantidad en el inventario
 	                int totalPrice = 0;
-	                quantityToSell= totalQuantity; 
+	               
 
 	                for (Cart cartItem : cartItems) {
 	                    Product product = cartItem.getProduct();
 
 	                    // Verificar si hay suficientes productos en el inventario para vender
-	                    if (product.getQuantityToSell() >= quantityToSell && product.getQuantityToSell() !=0 ) {
-	                        int itemTotalPrice = product.getPrice() * quantityToSell;
+	                    if (product.getQuantityToSell() >= cartItem.getTotalQuantity() && product.getQuantityToSell() !=0 ) {
+	                        int itemTotalPrice = product.getPrice() * cartItem.getTotalQuantity();
 	                        totalPrice += itemTotalPrice;
 
 	                        // Actualizar la cantidad en el inventario
-	                        int remainingQuantity = product.getQuantityToSell() - quantityToSell;
+	                        int remainingQuantity = product.getQuantityToSell() - cartItem.getTotalQuantity();
 	                        product.setQuantityToSell(remainingQuantity);
 	                        productRepository.save(product);
 	                        // Establecer la lista de productos vendidos en la venta
 	    	                sale.setSoldList(cartItems);
-	    	                sale.setAddress(address);
-	    	                sale.setPhoneNumber(phoneNumber);
+	    	                sale.setAddress(user.getAddress());
+	    	                sale.setPhoneNumber(user.getPhoneNumber());
 	    	                sale.setPrice(totalPrice);
 
 	    	                // Guardar la venta en la base de datos
@@ -121,13 +120,15 @@ public class SaleService {
 	        }
 	    }
 
+
     
     
     public List<Sale> sales() {
         return saleRepository.findAll();
     }
     
-    public Sale findById (long idSale) {
+    @SuppressWarnings("deprecation")
+	public Sale findById (long idSale) {
     	
     	return saleRepository.getById(idSale);
     	
@@ -140,5 +141,6 @@ public class SaleService {
     	return saleRepository.findByUser(user);
     }
     
-
+    
+ 
 }

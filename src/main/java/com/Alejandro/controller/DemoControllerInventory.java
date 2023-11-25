@@ -70,6 +70,8 @@ public class DemoControllerInventory {
 	            existingProduct.setProductName(product.getProductName());
 	            existingProduct.setProductDescription(product.getProductDescription());
 	            existingProduct.setSupplier(product.getSupplier());
+	            existingProduct.setApplyShipping(product.isApplyShipping());
+	            existingProduct.setShippingValue(product.getShippingValue());
 	            
 	            // Guarda el producto actualizado en la base de datos
 	            Product updatedProduct = inventoryService.save(existingProduct);
@@ -82,5 +84,8 @@ public class DemoControllerInventory {
 	        }
 	    }
 
+	    
+	    
+	    
 
 }

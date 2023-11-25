@@ -1,6 +1,8 @@
 package com.Alejandro.models;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,10 +34,43 @@ public class Cart {
 	@JoinColumn(name = "idSale") // Nombre de la columna que almacena la relación en la tabla de Producto
 	private Sale sale;
 	
+
+	@Column(name = "totalQuantity")
+	@JsonProperty("totalQuantity")
+	private Integer totalQuantity;
+	
 	public Cart() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+
+	public Sale getSale() {
+		return sale;
+	}
+
+
+
+
+	public void setSale(Sale sale) {
+		this.sale = sale;
+	}
+
+
+
+
+	public int getTotalQuantity() {
+		return totalQuantity;
+	}
+
+
+
+
+	public void setTotalQuantity(Integer totalQuantity) {
+		this.totalQuantity = totalQuantity;
+	}
+
+
 
 
 	public long getIdCart() {

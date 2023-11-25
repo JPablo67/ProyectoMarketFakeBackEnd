@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 
 import com.Alejandro.models.Cart;
 import com.Alejandro.models.Category;
+import com.Alejandro.models.ChangeQuantityRequest;
 
 import org.hibernate.service.spi.InjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,10 @@ public class DemoControllerCart {
 	    }
 
 	   
+	    @PostMapping("/changeQuantity")
+	    public ResponseEntity<Cart> changeQuantity(@RequestBody Cart cart) {
+	        return ResponseEntity.ok(cartService.changeQuantity(cart, cart.getTotalQuantity()));
+	    }
 
 		  
 	    

@@ -2,7 +2,7 @@ package com.Alejandro.controller;
 
 import com.Alejandro.Service.SaleService;
 import com.Alejandro.models.Sale;
-
+import com.Alejandro.models.User;
 import com.Alejandro.utils.PDFExporterClass;
 import com.lowagie.text.DocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,41 +23,30 @@ public class DemoControllerSale {
 
     @Autowired
     private PDFExporterClass pdfExporterClass;
-    
     @PostMapping("/make-purchase")
-    public ResponseEntity<String> makePurchase(@RequestBody Sale sale,
-                                               HttpServletResponse response,
-                                               @RequestParam(required = false) Integer totalQuantity) {
-        // Después de realizar la compra, generar el PDF
-       
-    	 
-       
+    public ResponseEntity<String> makePurchase(@RequestBody User user,
+                                               HttpServletResponse response) {
     	
+    	System.out.println(user.getIdUser());
         try {
-            if (totalQuantity == null) {
-                // Manejar la situación en la que totalQuantity es null
-                throw new IllegalArgumentException("La cantidad total no puede ser nula");
-            }
-
-            // Resto del código
-         Sale  sale3= saleService.makePurchase(
-                sale.getUser().getIdUser(),
-                sale.getAddress(),
-                sale.getPhoneNumber(),
-                totalQuantity.intValue()
+            Sale sale3 = saleService.makePurchase(
+                   user
             );
-            
 
-            Sale sale2 =saleService.findById(sale3.getIdSale());
-      	
-            generatePDF(response, sale2);
-
-            return ResponseEntity.ok("Compra realizada con éxito. PDF generado.");
+            if (sale3 != null) {
+            	 generatePDF(response, sale3);
+              
+                return ResponseEntity.ok("Compra realizada con éxito. PDF generado.");
+            } else {
+                System.out.println("El carrito está vacío. No se puede realizar la compra.");
+                return ResponseEntity.status(400).body("El carrito está vacío. No se puede realizar la compra.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error al realizar la compra: " + e.getMessage());
         }
     }
+
 
 
     private void generatePDF(HttpServletResponse response, Sale sale) {

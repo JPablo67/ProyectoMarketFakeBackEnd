@@ -26,7 +26,7 @@ public class Sale {
 
 	@OneToMany(mappedBy="sale")
 	private List <Cart> soldList;
-	
+
 	@Column(name = "address")
 	private String address;
 	
@@ -100,6 +100,7 @@ public class Sale {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
 	
 	
 

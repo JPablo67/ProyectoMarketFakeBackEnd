@@ -3,6 +3,8 @@ package com.Alejandro.models;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Data
@@ -23,6 +25,9 @@ public class User {
 	@Column(name = "email")
 	private String email;
 	
+	@Column(name = "address")
+	private String address;
+	
 	@Column(name = "password")
 	private String password;
 	
@@ -32,26 +37,20 @@ public class User {
 	@Column(name = "userType")
 	private String userType;
 	//HOLA
+	
+	@ManyToOne
+	@JoinColumn(name = "idSale") 
+	Sale sale;
 
-	public User(long idUser, String name, String lastname, String email,
-			String password, String phoneNumber, String userType) {
-		super();
-		this.idUser = idUser;
-		this.name = name;
-		this.lastname = lastname;
-		this.email = email;
-		this.password = password;
-		this.phoneNumber = phoneNumber;
-		this.userType = userType;
+	
+	
+	public long getIdUser() {
+		return idUser;
 	}
 
 	public User() {
-		
+		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public long getIdUser() {
-		return idUser;
 	}
 
 	public void setIdUser(long idUser) {
@@ -82,6 +81,14 @@ public class User {
 		this.email = email;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
 	public String getPassword() {
 		return password;
 	}
@@ -106,6 +113,7 @@ public class User {
 		this.userType = userType;
 	}
 
+	
 	
 
 	
