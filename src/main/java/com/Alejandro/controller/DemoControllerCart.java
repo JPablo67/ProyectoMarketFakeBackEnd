@@ -1,83 +1,83 @@
 package com.Alejandro.controller;
 
-
 import com.Alejandro.Service.CartService;
-import com.Alejandro.Service.ProductService;
-import com.Alejandro.models.Product;
-import com.Alejandro.repository.ICartRepository;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-
 import com.Alejandro.models.Cart;
-import com.Alejandro.models.Category;
 import com.Alejandro.models.ChangeQuantityRequest;
-
-import org.hibernate.service.spi.InjectService;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:8081", "https://localhost:8443"})
 public class DemoControllerCart {
 
-	 
-	 
-	@Autowired
-	 private CartService cartService;
-	 
-	 
-	 
+    @Value("${aws.sqs.cart-queue.name:cart-queue}")
+    private String queueName;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private AmazonSQS sqs;
+
+    @Autowired
+    private RedisTemplate<String, Cart> redisTemplate;
 
     @PostMapping
     public ResponseEntity<Cart> create(@RequestBody Cart cart) {
-    	
-        return ResponseEntity.ok(cartService.save(cart));
+        Cart saved = cartService.save(cart);
+
+        // Enviar ID de carrito a SQS
+        String queueUrl = sqs.getQueueUrl(queueName).getQueueUrl();
+        sqs.sendMessage(new SendMessageRequest(queueUrl, String.valueOf(saved.getIdCart())));
+
+        // Guardar carrito en Redis
+        String redisKey = "cart:user:" + saved.getUser().getIdUser();
+        redisTemplate.opsForValue().set(redisKey, saved);
+
+        return ResponseEntity.ok(saved);
     }
 
+    @GetMapping("/{idUser}/carts")
+    public ResponseEntity<List<Cart>> getUserById(@PathVariable Long idUser) {
+        List<Cart> carts = cartService.findCartByOwner(idUser);
+        return ResponseEntity.ok(carts);
+    }
 
+    @GetMapping("/checkProductInCart/{idUser}/{idProduct}")
+    public ResponseEntity<Map<String, Boolean>> checkProductInCart(
+            @PathVariable long idUser,
+            @PathVariable long idProduct) {
 
-	    @GetMapping("/{idUser}/carts")
-	    public ResponseEntity<List<Cart>>getUserById(@PathVariable Long idUser) {
-	    	
-			 return ResponseEntity.ok(cartService.findCartByOwner(idUser));
-	    }
-	 
-	 
-	    @GetMapping("/checkProductInCart/{idUser}/{idProduct}")
-	    public ResponseEntity<Map<String, Boolean>> checkProductInCart(
-	        @PathVariable("idUser") long idUser,
-	        @PathVariable("idProduct") long idProduct) {
+        boolean isProductInCart = cartService.checkProductInCart(idUser, idProduct);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isProductInCart", isProductInCart);
+        return ResponseEntity.ok(response);
+    }
 
-	        boolean isProductInCart = cartService.checkProductInCart(idUser, idProduct);
+    @PostMapping("/changeQuantity")
+    public ResponseEntity<Cart> changeQuantity(@RequestBody ChangeQuantityRequest request) {
+        Cart cart = cartService.findByUserAndProduct(request.getUserId(), request.getProductId());
+        Cart updated = cartService.changeQuantity(cart, request.getQuantity());
 
-	        Map<String, Boolean> response = new HashMap<>();
-	        response.put("isProductInCart", isProductInCart);
+        // Actualizar carrito en Redis
+        String redisKey = "cart:user:" + request.getUserId();
+        redisTemplate.opsForValue().set(redisKey, updated);
 
-	        return ResponseEntity.ok(response);
-	    }
+        // Notificar cambio a SQS
+        String queueUrl = sqs.getQueueUrl(queueName).getQueueUrl();
+        sqs.sendMessage(new SendMessageRequest(queueUrl,
+                "quantityChanged:" + updated.getIdCart()));
 
-	   
-	    @PostMapping("/changeQuantity")
-	    public ResponseEntity<Cart> changeQuantity(@RequestBody Cart cart) {
-	        return ResponseEntity.ok(cartService.changeQuantity(cart, cart.getTotalQuantity()));
-	    }
-
-		  
-	    
-
-   
-
+        return ResponseEntity.ok(updated);
+    }
 }
-

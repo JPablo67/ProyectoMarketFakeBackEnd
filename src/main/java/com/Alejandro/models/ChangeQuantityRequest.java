@@ -2,32 +2,35 @@ package com.Alejandro.models;
 
 public class ChangeQuantityRequest {
 
-	 private Cart cart;
-	    
-	 private Integer quantity;
+    private Long userId;
+    private Long productId;
+    private Integer quantity;
 
-	 
-	 
-	public ChangeQuantityRequest() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public ChangeQuantityRequest() {
+        // Default constructor
+    }
 
-	public Cart getCart() {
-		return cart;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public Integer getQuantity() {
-		return quantity;
-	}
+    public Long getProductId() {
+        return productId;
+    }
 
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
-	 
-	 
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
 }

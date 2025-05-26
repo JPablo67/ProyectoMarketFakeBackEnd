@@ -38,87 +38,65 @@ public class SaleService {
 	    
 	    @Autowired
 	    private CartService cartService;
-	    @Transactional
-	    public Sale makePurchase(User user) {
-	        try {
-	            // Obtener la lista de carritos del usuario con la cédula proporcionada
-	            List<Cart> cartItems = cartService.findCartByOwner(user.getIdUser());
+    @Transactional
+    public Sale makePurchase(User user) {
+        // Cargar usuario completo desde la base de datos
+        User dbUser = userRepository.findById(user.getIdUser())
+            .orElseThrow(() -> new EntityNotFoundException(
+                "Usuario no encontrado: " + user.getIdUser()));
+        // Obtener los carritos del usuario
+        List<Cart> cartItems = cartService.findCartByOwner(dbUser.getIdUser());
+        if (cartItems.isEmpty()) {
+            throw new IllegalStateException("El carrito está vacío. No se puede realizar la compra.");
+        }
 
-	            // Verificar si la lista de carritos no está vacía
-	            if (!cartItems.isEmpty()) {
-	            	
-	            	 int quantityToSell=0;
-	                // Crear una nueva venta
-	                Sale sale = new Sale();
-	                // Obtener el usuario por la cédula
-	               
-	                sale.setUser(user);
+        // Crear instancia de Sale y asignar datos del usuario
+        Sale sale = new Sale();
+        sale.setUser(dbUser);
+        sale.setAddress(dbUser.getAddress());
+        sale.setPhoneNumber(dbUser.getPhoneNumber());
 
-	                // Lista de productos vendidos
-	                List<Product> soldProducts = new ArrayList<>();
+        // Calcular precio total y actualizar inventario
+        int totalPrice = 0;
+        for (Cart cartItem : cartItems) {
+            Product product = productRepository.findById(cartItem.getProduct().getIdProduct())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                        "Producto no encontrado: " + cartItem.getProduct().getIdProduct()));
+            int qty = cartItem.getTotalQuantity();
+            if (product.getQuantityToSell() < qty) {
+                throw new IllegalStateException(
+                    "Inventario insuficiente para producto: " + product.getProductName());
+            }
+            totalPrice += product.getPrice() * qty;
+            int remaining = product.getQuantityToSell() - qty;
+            product.setQuantityToSell(remaining);
+            productRepository.save(product);
+        }
+        sale.setPrice(totalPrice);
+        sale.setSoldList(cartItems);  // Registrar los items vendidos
 
-	                // Calcular el precio total y actualizar la cantidad en el inventario
-	                int totalPrice = 0;
-	               
+        // Guardar la venta en base de datos
+        saleRepository.save(sale);
 
-	                for (Cart cartItem : cartItems) {
-	                    Product product = cartItem.getProduct();
+        // Limpiar carrito y productos agotados
+        for (Cart cartItem : cartItems) {
+            int purchasedQty = cartItem.getTotalQuantity();
+            // Subtract purchased quantity from remaining cart
+            int remainingCartQty = purchasedQty - purchasedQty; // full purchase
+            if (remainingCartQty > 0) {
+                cartItem.setTotalQuantity(remainingCartQty);
+                cartRepository.save(cartItem);
+            } else {
+            }
+            // If product sold out, delete product
+            Product p = cartItem.getProduct();
+            if (p.getQuantityToSell() == 0) {
+                productRepository.delete(p);
+            }
+        }
 
-	                    // Verificar si hay suficientes productos en el inventario para vender
-	                    if (product.getQuantityToSell() >= cartItem.getTotalQuantity() && product.getQuantityToSell() !=0 ) {
-	                        int itemTotalPrice = product.getPrice() * cartItem.getTotalQuantity();
-	                        totalPrice += itemTotalPrice;
-
-	                        // Actualizar la cantidad en el inventario
-	                        int remainingQuantity = product.getQuantityToSell() - cartItem.getTotalQuantity();
-	                        product.setQuantityToSell(remainingQuantity);
-	                        productRepository.save(product);
-	                        // Establecer la lista de productos vendidos en la venta
-	    	                sale.setSoldList(cartItems);
-	    	                sale.setAddress(user.getAddress());
-	    	                sale.setPhoneNumber(user.getPhoneNumber());
-	    	                sale.setPrice(totalPrice);
-
-	    	                // Guardar la venta en la base de datos
-	    	                saleRepository.save(sale);
-	    	                
-	                        soldProducts.add(product);
-	                    } else {
-	                       System.out.println("No hay productos suficientes");
-	                    }
-	                }
-
-	            
-	              
-	                // Eliminar productos del carrito y del inventario si la cantidad llega a cero
-	                for (Product soldProduct : soldProducts) {
-	                    // Eliminar el producto del carrito
-	                   
-
-	                    // Verificar si la cantidad en el inventario llega a cero
-	                    if (soldProduct.getQuantityToSell() == 0) {
-	                    	 cartRepository.deleteByUserAndProduct(user, soldProduct);
-	                        productRepository.delete(soldProduct);
-	                    }
-	                }
-	                
-	                return sale;
-
-	            } else {
-	                // Manejar la situación en la que el carrito está vacío
-	                System.out.println("El carrito está vacío. No se puede realizar la compra.");
-	                return null;
-	            }
-	        } catch (Exception e) {
-	            // Agregar registros de depuración
-	            System.out.println("Error en makePurchase: " + e.getMessage());
-	            e.printStackTrace();
-
-	            // Relanzar la excepción después de imprimir la traza
-	            throw e;
-	          
-	        }
-	    }
+        return sale;
+    }
 
 
     
